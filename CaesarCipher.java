@@ -1,18 +1,18 @@
 public class CaesarCipher {
     public static void main (String[] args) throws Exception {
-        //String instruction = args[0];
+        String instruction = args[0];
         String message = args[1];
-
-        String newMessage = encode(message, 2);
 
         java.io.PrintWriter printer;
         printer = new java.io.PrintWriter(System.out, true);
-        printer.println("key: 2 " + newMessage);
-        
+
+        if (instruction.equals("encode")) {
+            displayAllEncodes(printer, message);
+        }      
     } // main(String[])
 
     public static String encode (String message, int key) {
-        char[] messageArr= message.toCharArray();
+        char[] messageArr = message.toCharArray();
 
         for (int index = 0; index < messageArr.length; index++) {
             int charCode = (int) messageArr[index];
@@ -21,12 +21,20 @@ public class CaesarCipher {
             messageArr[index] = encryptedChar;
         }
         return new String(messageArr);
-    }
+    } // encode(String, int)
 
     public static int encryptedCharCode (int charCode, int key) {
         int rebasedCharCode = charCode - 97;
         int newCharCode = (rebasedCharCode + key) % 26;
         return newCharCode + 97;
-    }
+    } // encryptedCharCode(int, int)
+
+    public static void displayAllEncodes (java.io.PrintWriter printer, String message) {
+        int numOfAlphabets = 26;
+        for(int key = 0; key < numOfAlphabets; key++) {
+            String newMessage = encode(message, key);
+            printer.println("n = " + key + ": " + newMessage); //could also use printf
+        }
+    } // displayAllEncodes(java.io.PrintWriter, String)
 
 } // class CaesarCipher
