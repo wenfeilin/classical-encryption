@@ -8,7 +8,9 @@ public class CaesarCipher {
 
         if (instruction.equals("encode")) {
             displayAllEncodes(printer, message);
-        }      
+        } else if (instruction.equals("decode")) {
+            displayAllDecodes(printer, message);
+        }
     } // main(String[])
 
     public static String encode (String message, int key) {
@@ -37,4 +39,32 @@ public class CaesarCipher {
         }
     } // displayAllEncodes(java.io.PrintWriter, String)
 
+    public static String decode (String message, int key) {
+        char[] messageArr = message.toCharArray();
+
+        for (int index = 0; index < messageArr.length; index++) {
+            int charCode = (int) messageArr[index];
+
+            char decryptedChar = (char) decryptedCharCode(charCode, key);
+            messageArr[index] = decryptedChar;
+        }
+        return new String(messageArr);
+    } // decode(String, int)
+
+    public static int decryptedCharCode (int charCode, int key) {
+        int rebasedCharCode = charCode - 97;
+        int newCharCode = (rebasedCharCode - key);
+        if (newCharCode < 0) {
+             newCharCode += 26;
+        }
+        return newCharCode + 97;
+    }
+
+    public static void displayAllDecodes (java.io.PrintWriter printer, String message) {
+        int numOfAlphabets = 26;
+        for(int key = 0; key < numOfAlphabets; key++) {
+            String newMessage = decode(message, key);
+            printer.println("n = " + key + ": " + newMessage); //could also use printf
+        }
+    }
 } // class CaesarCipher
