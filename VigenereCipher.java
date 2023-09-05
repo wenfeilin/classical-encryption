@@ -8,14 +8,14 @@ public class VigenereCipher {
         String keyword = args[2];
 
         if (instruction.equals("encode")) {
-            printer.println(encode(message, keyword));
-        } /*else if (instruction.equals("decode")) {
-            decode(printer, message);
-        }*/
+            encode(printer, message, keyword);
+        } else if (instruction.equals("decode")) {
+            decode(printer, message, keyword);
+        }
 
     } // main(String[])
 
-    public static String encode (String message, String keyword) {
+    public static void encode (java.io.PrintWriter printer, String message, String keyword) {
         char[] newKeyword = createNewKeyword(message, keyword);
         //could make it so that it adds the char values directly 
              //instead of making a new keyword that is as long as  
@@ -24,7 +24,7 @@ public class VigenereCipher {
         //lines abt adding new key to msg:
         char[] encryptedMsg = createEncodedMsg(message, newKeyword);
 
-        return new String(encryptedMsg);
+        printer.println(encryptedMsg);
     } // encode(String, String)
 
     public static int encryptedCharCode (int charCode, int key) {
@@ -58,4 +58,32 @@ public class VigenereCipher {
         } 
         return newKeyword;
     }
+
+    public static void decode (java.io.PrintWriter printer, String message, String keyword) {
+        char[] newKeyword = createNewKeyword(message, keyword);
+        
+        char[] decryptedMsg = createDecodedMsg(message, newKeyword);
+
+        printer.println(decryptedMsg);
+    } // decode (java.io.PrintWriter, String, String)
+
+    public static int decryptedCharCode (int charCode, int key) {
+        int rebasedMsgCharCode = charCode - 97;
+        int rebasedKeyCharCode = key - 97;
+        int newCharCode = (rebasedMsgCharCode - rebasedKeyCharCode);
+        if (newCharCode < 0) {
+             newCharCode += 26;
+        }
+        return newCharCode + 97;
+    } // decryptedCharCode(int, int)
+
+    public static char[] createDecodedMsg (String message, char[] newKeyword) {
+        char[] decryptedMsg = new char[message.length()];
+        for (int index = 0; index < message.length(); index++) {
+            int msgCharCode = (int) message.charAt(index);
+            int newKeyCharCode = (int)newKeyword[index];
+            decryptedMsg[index] = (char) decryptedCharCode(msgCharCode, newKeyCharCode);
+        }
+        return decryptedMsg;
+    } // createDecodedMsg (String, char[])
 } // class VigenereCipher
