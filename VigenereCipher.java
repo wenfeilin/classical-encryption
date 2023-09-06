@@ -1,7 +1,23 @@
 public class VigenereCipher {
     public static void main (String[] args) throws Exception {
+        java.io.PrintWriter errorPrinter;
+        errorPrinter = new java.io.PrintWriter(System.err, true);
+
+        if (args.length != 3 && args.length != 2) {
+            errorPrinter.println("Incorrect number of parameters"); 
+            System.exit(2);
+        } else if (!(args[0].equals("encode") || args[0].equals("decode"))) {
+            errorPrinter.println("Valid options are \"encode\" or \"decode\""); 
+            System.exit(1);
+        } else if (args.length == 2) { // to cover edge case: keyword is an empty string
+            errorPrinter.println(args[1]);
+            System.exit(3);
+        }
+        
+        //refactor everything later
+        
         java.io.PrintWriter printer;
-        printer = new java.io.PrintWriter(System.out, true);
+        printer = new java.io.PrintWriter(System.out,  true);
 
         String instruction = args[0];
         String message = args[1];
@@ -12,7 +28,6 @@ public class VigenereCipher {
         } else if (instruction.equals("decode")) {
             decode(printer, message, keyword);
         }
-
     } // main(String[])
 
     public static void encode (java.io.PrintWriter printer, String message, String keyword) {
@@ -42,7 +57,7 @@ public class VigenereCipher {
             encryptedMsg[index] = (char) encryptedCharCode(msgCharCode, newKeyCharCode);
         }
         return encryptedMsg;
-    }
+    } // createEncodedMsg(String, char[])
 
     public static char[] createNewKeyword (String message, String keyword) {
         char[] newKeyword = new char[message.length()]; 
@@ -57,7 +72,7 @@ public class VigenereCipher {
             keywordIndex++;
         } 
         return newKeyword;
-    }
+    } // createNewKeyword(String, String)
 
     public static void decode (java.io.PrintWriter printer, String message, String keyword) {
         char[] newKeyword = createNewKeyword(message, keyword);
