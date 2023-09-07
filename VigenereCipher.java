@@ -1,104 +1,208 @@
+import java.io.PrintWriter;
+
+/**
+ * An implementation of Vigenere cipher, which uses a keyword to shift a message when encrypting
+ * and decrypting.
+ * 
+ * The message and the keyword must only contain lowercase alphabetical characters and no 
+ * whitespace.
+ *
+ * @author Wenfei Lin
+ */
 public class VigenereCipher {
-    public static void main (String[] args) throws Exception {
-        java.io.PrintWriter errorPrinter;
-        errorPrinter = new java.io.PrintWriter(System.err, true);
+  public static void main (String[] args) throws Exception {
+    PrintWriter errorPrinter = new PrintWriter(System.err, true);
 
-        if (args.length != 3 && args.length != 2) {
-            errorPrinter.println("Incorrect number of parameters"); 
-            System.exit(2);
-        } else if (!(args[0].equals("encode") || args[0].equals("decode"))) {
-            errorPrinter.println("Valid options are \"encode\" or \"decode\""); 
-            System.exit(1);
-        } else if (args.length == 2) { // to cover edge case: keyword is an empty string
-            errorPrinter.println(args[1]);
-            System.exit(3);
-        }
-        
-        //refactor everything later
-        
-        java.io.PrintWriter printer;
-        printer = new java.io.PrintWriter(System.out,  true);
+    if (args.length != 3 && args.length != 2) {
+      // When the number of command-line arguments is not 3 (assuming the keyword
+      // is not an empty string) nor is it 2 (assuming the keyword is an empty string), 
+      // then indicate the error and exit appropriately
+      errorPrinter.println("Incorrect number of parameters"); 
+      System.exit(2);
+    } else if (!(args[0].equals("encode") || args[0].equals("decode"))) {
+      // When the instruction is not "encode" or "decode," indicate the error
+      // and exit appropriately
+      errorPrinter.println("Valid options are \"encode\" or \"decode\""); 
+      System.exit(1);
+    } 
+      
+    PrintWriter printer = new PrintWriter(System.out,  true);
 
-        String instruction = args[0];
-        String message = args[1];
-        String keyword = args[2];
+    String instruction = args[0]; // tells program to encode or decode
+    String message = args[1]; // tells program the message to encode or decode
+    String keyword; // tells program the keyword to encode or decode
+    
+    // To cover the edge case where the keyword is an empty string
+    if (args.length == 2) { 
+      // Makes sure to set the keyword to an empty string because "" in the 
+      // command-line is not considered an argument
+      keyword = ""; 
+    } else {
+      // Proceed as usual if the keyword is not an empty string
+      keyword = args[2];
+    }
 
-        if (instruction.equals("encode")) {
-            encode(printer, message, keyword);
-        } else if (instruction.equals("decode")) {
-            decode(printer, message, keyword);
-        }
-    } // main(String[])
+    if (instruction.equals("encode")) { // when the instruction is to encrypt
+      displayEncodedMsg(printer, message, keyword);
+    } else if (instruction.equals("decode")) { // when the instruction is to decrypt
+      displayDecodedMsg(printer, message, keyword);
+    }
+  } // main(String[])
 
-    public static void encode (java.io.PrintWriter printer, String message, String keyword) {
-        char[] newKeyword = createNewKeyword(message, keyword);
-        //could make it so that it adds the char values directly 
-             //instead of making a new keyword that is as long as  
-             //the msg string
+  /**
+   * Prints the encrypted message.
+   */ 
+  public static void displayEncodedMsg (PrintWriter printer, String message, String keyword) {
+    if (keyword.equals("")) { // when the keyword is an empty string
+      // Because the keyword is an empty string, the message will not change
+      // so print the original message
+      printer.println(message);
+    } else { //when the keyword is not an empty string
+      // Make a new keyword that repeats the keyword until the 
+      // length of the new keyword matches the length of the message
+      char[] newKeyword = createNewKeyword(message, keyword);
+      // Create the encrypted message by adding the keyword and 
+      // the original message together
+      String encryptedMsg = createEncodedMsg(message, newKeyword);
 
-        //lines abt adding new key to msg:
-        char[] encryptedMsg = createEncodedMsg(message, newKeyword);
+      printer.println(encryptedMsg);
+    }
+  } // encode(PrintWriter, String, String)
 
-        printer.println(encryptedMsg);
-    } // encode(String, String)
+  /**
+   * Creates and returns the encrypted message from the original message. 
+   */ 
+  public static String createEncodedMsg (String message, char[] newKeyword) {
+    // Encrypted message should be the same length as the original message
+    char[] encryptedMsg = new char[message.length()];
 
-    public static int encryptedCharCode (int charCode, int key) {
-        int rebasedMsgCharCode = charCode - 97;
-        int rebasedKeyCharCode = key - 97;
-        int newCharCode = (rebasedMsgCharCode + rebasedKeyCharCode) % 26;
-        return newCharCode + 97;
-    } // encryptedCharCode(int, int)
+    // Loop for every character in the original message
+    for (int index = 0; index < message.length(); index++) {
+      // Convert the character in the message to its integer character code
+      int msgCharCode = (int) message.charAt(index);
+      // Convert the character in the new keyword at the same index to its 
+      // integer character code
+      int newKeyCharCode = (int) newKeyword[index];
 
-    public static char[] createEncodedMsg (String message, char[] newKeyword) {
-        char[] encryptedMsg = new char[message.length()];
-        for (int index = 0; index < message.length(); index++) {
-            int msgCharCode = (int) message.charAt(index);
-            int newKeyCharCode = (int)newKeyword[index];
-            encryptedMsg[index] = (char) encryptedCharCode(msgCharCode, newKeyCharCode);
-        }
-        return encryptedMsg;
-    } // createEncodedMsg(String, char[])
+      // Converts the encrypted character code to the correpsonding 
+      // character and saves the new encrypted character in the 
+      // encrypted message
+      encryptedMsg[index] = (char) encryptCharCode(msgCharCode, newKeyCharCode);
+    }
 
-    public static char[] createNewKeyword (String message, String keyword) {
-        char[] newKeyword = new char[message.length()]; 
-        int keywordLength = keyword.length();
-        int keywordIndex = 0;
+    return new String(encryptedMsg);
+  } // createEncodedMsg(String, char[])
 
-        for (int index = 0; index < message.length(); index++) {
-            if (keywordIndex >= keywordLength) {
-                keywordIndex = 0;
-            }
-            newKeyword[index] = keyword.charAt(keywordIndex);
-            keywordIndex++;
-        } 
-        return newKeyword;
-    } // createNewKeyword(String, String)
+  /**
+   * Computes and returns the character code of the encrypted character.
+   */  
+  public static int encryptCharCode (int charCode, int key) {
+    // Rebase the original character code to 0-25
+    int rebasedMsgCharCode = charCode - 97;
+    // Rebase the keyword character code to 0-25
+    int rebasedKeyCharCode = key - 97;
+    // Add the key's character code to the rebased message character 
+    // code and handle the "wrap-around" for whenever that sum is 
+    // greater than 25
+    int newCharCode = (rebasedMsgCharCode + rebasedKeyCharCode) % 26;
 
-    public static void decode (java.io.PrintWriter printer, String message, String keyword) {
-        char[] newKeyword = createNewKeyword(message, keyword);
-        
-        char[] decryptedMsg = createDecodedMsg(message, newKeyword);
+    return newCharCode + 97;
+  } // encryptCharCode(int, int)
 
-        printer.println(decryptedMsg);
-    } // decode (java.io.PrintWriter, String, String)
+  /**
+   * Creates and returns the new keyword, which is the keyword repeated over 
+   * the length of the original message.
+   */ 
+  public static char[] createNewKeyword (String message, String keyword) {
+    // Create the new keyword to hold the length of message characters
+    char[] newKeyword = new char[message.length()]; 
+    int keywordLength = keyword.length();
+    int keywordIndex = 0;
 
-    public static int decryptedCharCode (int charCode, int key) {
-        int rebasedMsgCharCode = charCode - 97;
-        int rebasedKeyCharCode = key - 97;
-        int newCharCode = (rebasedMsgCharCode - rebasedKeyCharCode);
-        if (newCharCode < 0) {
-             newCharCode += 26;
-        }
-        return newCharCode + 97;
-    } // decryptedCharCode(int, int)
+    // Loop through the new keyword's characters for as long as the 
+    // length of message
+    for (int index = 0; index < message.length(); index++) {
+      // If it comes to the point where the keyword starts repeating
+      if (keywordIndex >= keywordLength) {
+        // go back to the first character of the original keyword, then 
+        // make that character the next character in the new keyword
+        keywordIndex = 0;
+      }
 
-    public static char[] createDecodedMsg (String message, char[] newKeyword) {
-        char[] decryptedMsg = new char[message.length()];
-        for (int index = 0; index < message.length(); index++) {
-            int msgCharCode = (int) message.charAt(index);
-            int newKeyCharCode = (int)newKeyword[index];
-            decryptedMsg[index] = (char) decryptedCharCode(msgCharCode, newKeyCharCode);
-        }
-        return decryptedMsg;
-    } // createDecodedMsg (String, char[])
+      // Save the character from the original keyword in the new keyword
+      newKeyword[index] = keyword.charAt(keywordIndex);
+      // Go to the next character in the new keyword
+      keywordIndex++;
+    } 
+
+    return newKeyword;
+  } // createNewKeyword(String, String)
+
+  /**
+   * Prints the decrypted message. 
+   */ 
+  public static void displayDecodedMsg (PrintWriter printer, String message, String keyword) {
+    if (keyword.equals("")) { // when the keyword is an empty string
+      // Because the keyword is an empty string, the message will not change
+      // so print the original message
+      printer.println(message);
+    } else { // when the keyword is not an empty string
+      // Make a new keyword that repeats the keyword until the 
+      // length of the new keyword matches the length of the message
+      char[] newKeyword = createNewKeyword(message, keyword);
+      // Create the encrypted message by adding the keyword and 
+      // the original message together
+      String decryptedMsg = createDecodedMsg(message, newKeyword);
+
+      printer.println(decryptedMsg);
+    }
+  } // decode (PrintWriter, String, String)
+
+  /**
+   * Creates the decrypted message from the original message. 
+   */ 
+  public static String createDecodedMsg (String message, char[] newKeyword) {
+    // Decrypted message should be the same length as the original message
+    char[] decryptedMsg = new char[message.length()];
+
+    // Loop for every character in the original message
+    for (int index = 0; index < message.length(); index++) {
+      // Convert the character in the message to its integer character code
+      int msgCharCode = (int) message.charAt(index);
+      // Convert the character in the new keyword at the same index to its 
+      // integer character code
+      int newKeyCharCode = (int) newKeyword[index];
+
+      // Converts the decrypted character code to the correpsonding 
+      // character and saves the new decrypted character in the 
+      // decrypted message
+      decryptedMsg[index] = (char) decryptCharCode(msgCharCode, newKeyCharCode);
+    }
+    return new String(decryptedMsg);
+  } // createDecodedMsg (String, char[])
+
+  /**
+   * Computes and returns the character code of the decrypted character. 
+   */  
+  public static int decryptCharCode (int charCode, int key) {
+    // Rebase the original character code to 0-25
+    int rebasedMsgCharCode = charCode - 97;
+    // Rebase the keyword character code to 0-25
+    int rebasedKeyCharCode = key - 97;
+    // Subtract the key's character code to the rebased message character 
+    // code
+    int newCharCode = (rebasedMsgCharCode - rebasedKeyCharCode);
+
+    // If a "wrap-around" is needed, meaning the new character code is less than
+    // 0, 
+    if (newCharCode < 0) {
+      // then add 26 to the new character code, which will "connect" the 0 end of the
+      // range to the 25 end of the range so the chracter code won't be negative
+      newCharCode += 26;
+    }
+
+    // Convert back to the ASCII code range for lowercase alphabetic 
+    // letters (97-122)
+    return newCharCode + 97;
+  } // decryptCharCode(int, int)
 } // class VigenereCipher
