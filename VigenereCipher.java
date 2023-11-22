@@ -43,78 +43,11 @@ public class VigenereCipher {
     }
 
     if (instruction.equals("encode")) { // when the instruction is to encrypt
-      displayEncodedMsg(printer, message, keyword);
+      displayNewMsg(printer, message, keyword, "encode");
     } else if (instruction.equals("decode")) { // when the instruction is to decrypt
-      displayDecodedMsg(printer, message, keyword);
+      displayNewMsg(printer, message, keyword, "decode");
     }
   } // main(String[])
-
-  /**
-   * Prints the encrypted message.
-   * Pre-conditions: message and keyword must only contain lowercase alphabetical characters 
-   * and no whitespace (only keyword can be empty)
-   * Post-conditions: prints encrypted message (only has lowercase alphabetical characters and
-   * no whitespace)
-   * The encrypted message can be the same as message if keyword was empty
-   */   
-  public static void displayEncodedMsg (PrintWriter printer, String message, String keyword) {
-    if (keyword.equals("")) { // when the keyword is an empty string
-      // Because the keyword is an empty string, the message will not change so print the original
-      // message
-      printer.println(message);
-    } else { //when the keyword is not an empty string
-      // Make a new keyword that repeats the keyword until the length of the new keyword matches 
-      // the length of the message
-      char[] newKeyword = createNewKeyword(message, keyword);
-      // Create the encrypted message by adding the keyword and the original message together
-      String encryptedMsg = createEncodedMsg(message, newKeyword);
-
-      printer.println(encryptedMsg);
-    }
-  } // encode(PrintWriter, String, String)
-
-  /**
-   * Creates and returns the encrypted message from the original message. 
-   * Pre-conditions: message and newKeyword must only contain lowercase alphabetical characters and
-   * no whitespace (newKeyword cannot be empty)
-   * Post-conditions: returns the encrypted message (only has lowercase alphabetical characters and
-   * no whitespace)
-   */ 
-  public static String createEncodedMsg (String message, char[] newKeyword) {
-    // Encrypted message should be the same length as the original message
-    char[] encryptedMsg = new char[message.length()];
-
-    // Loop for every character in the original message
-    for (int index = 0; index < message.length(); index++) {
-      // Convert the character in the message to its integer character code
-      int msgCharCode = (int) message.charAt(index);
-      // Convert the character in the new keyword at the same index to its integer character code
-      int newKeyCharCode = (int) newKeyword[index];
-
-      // Converts the encrypted character code to the correpsonding character and saves the new 
-      // encrypted character in the encrypted message
-      encryptedMsg[index] = (char) encryptCharCode(msgCharCode, newKeyCharCode);
-    }
-
-    return new String(encryptedMsg);
-  } // createEncodedMsg(String, char[])
-
-  /**
-   * Computes and returns the character code of the encrypted character.
-   * Pre-conditions: charCode and key must have (positive) ASCII codes between 97-122
-   * Post-conditions: returns the encrypted character code (positive and between 97-122)
-   */  
-  public static int encryptCharCode (int charCode, int key) {
-    // Rebase the original character code to 0-25
-    int rebasedMsgCharCode = charCode - 97;
-    // Rebase the keyword character code to 0-25
-    int rebasedKeyCharCode = key - 97;
-    // Add the key's character code to the rebased message character code and handle the 
-    // "wrap-around" for whenever that sum is greater than 25
-    int newCharCode = (rebasedMsgCharCode + rebasedKeyCharCode) % 26;
-
-    return newCharCode + 97;
-  } // encryptCharCode(int, int)
 
   /**
    * Creates and returns the new keyword, which is the keyword repeated over the length of the 
@@ -149,39 +82,15 @@ public class VigenereCipher {
   } // createNewKeyword(String, String)
 
   /**
-   * Prints the decrypted message. 
-   * Pre-conditions: message and keyword must only contain lowercase alphabetical characters 
-   * and no whitespace (only keyword can be empty)
-   * Post-conditions: prints decrypted message (only has lowercase alphabetical characters and
-   * no whitespace)
-   * The decrypted message can be the same as message if keyword was empty
-   */ 
-  public static void displayDecodedMsg (PrintWriter printer, String message, String keyword) {
-    if (keyword.equals("")) { // when the keyword is an empty string
-      // Because the keyword is an empty string, the message will not change so print the original
-      // message
-      printer.println(message);
-    } else { // when the keyword is not an empty string
-      // Make a new keyword that repeats the keyword until the length of the new keyword matches 
-      // the length of the message
-      char[] newKeyword = createNewKeyword(message, keyword);
-      // Create the encrypted message by adding the keyword and the original message together
-      String decryptedMsg = createDecodedMsg(message, newKeyword);
-
-      printer.println(decryptedMsg);
-    }
-  } // decode (PrintWriter, String, String)
-
-  /**
-   * Creates the decrypted message from the original message. 
+   * Creates the decrypted or encrypted message from the original message. 
    * Pre-conditions: message and newKeyword must only contain lowercase alphabetical characters and
    * no whitespace (newKeyword cannot be empty)
-   * Post-conditions: returns the decrypted message (only has lowercase alphabetical characters and
+   * Post-conditions: returns the decrypted or encrypted message (only has lowercase alphabetical characters and
    * no whitespace)
    */ 
-  public static String createDecodedMsg (String message, char[] newKeyword) {
-    // Decrypted message should be the same length as the original message
-    char[] decryptedMsg = new char[message.length()];
+  public static String createNewMsg (String message, char[] newKeyword, String instruction) {
+    // New message should be the same length as the original message
+    char[] newMsg = new char[message.length()];
 
     // Loop for every character in the original message
     for (int index = 0; index < message.length(); index++) {
@@ -190,12 +99,16 @@ public class VigenereCipher {
       // Convert the character in the new keyword at the same index to its integer character code
       int newKeyCharCode = (int) newKeyword[index];
 
-      // Converts the decrypted character code to the correpsonding character and saves the new 
-      // decrypted character in the decrypted message
-      decryptedMsg[index] = (char) decryptCharCode(msgCharCode, newKeyCharCode);
+      // Converts the decrypted or encrypted character code to the correpsonding character and saves the new 
+      // decrypted or encrypted character in the new message
+      if (instruction.equals("encode")) {
+        newMsg[index] = (char) encryptCharCode(msgCharCode, newKeyCharCode);
+      } else {
+        newMsg[index] = (char) decryptCharCode(msgCharCode, newKeyCharCode);
+      }
     }
-    return new String(decryptedMsg);
-  } // createDecodedMsg (String, char[])
+    return new String(newMsg);
+  } // createNewMsg (String, char[], String)
 
   /**
    * Computes and returns the character code of the decrypted character. 
@@ -203,10 +116,13 @@ public class VigenereCipher {
    * Post-conditions: returns the decrypted character code (positive and between 97-122)
    */  
   public static int decryptCharCode (int charCode, int key) {
+    int asciiValOfa = 97;
+    int numOfAlphabets = 26;
+
     // Rebase the original character code to 0-25
-    int rebasedMsgCharCode = charCode - 97;
+    int rebasedMsgCharCode = charCode - asciiValOfa;
     // Rebase the keyword character code to 0-25
-    int rebasedKeyCharCode = key - 97;
+    int rebasedKeyCharCode = key - asciiValOfa;
     // Subtract the key's character code to the rebased message character code
     int newCharCode = (rebasedMsgCharCode - rebasedKeyCharCode);
 
@@ -214,10 +130,58 @@ public class VigenereCipher {
     if (newCharCode < 0) {
       // then add 26 to the new character code, which will "connect" the 0 end of the range to the
       // 25 end of the range so the chracter code won't be negative
-      newCharCode += 26;
+      newCharCode += numOfAlphabets;
     }
 
     // Convert back to the ASCII code range for lowercase alphabetic letters (97-122)
-    return newCharCode + 97;
+    return newCharCode + asciiValOfa;
   } // decryptCharCode(int, int)
+
+  /**
+   * Prints the encrypted message.
+   * Pre-conditions: message and keyword must only contain lowercase alphabetical characters 
+   * and no whitespace (only keyword can be empty)
+   * Post-conditions: prints encrypted message (only has lowercase alphabetical characters and
+   * no whitespace)
+   * The encrypted message can be the same as message if keyword was empty
+   */   
+  public static void displayNewMsg (PrintWriter printer, String message, String keyword, String instruction) {
+    if (keyword.equals("")) { // when the keyword is an empty string
+      // Because the keyword is an empty string, the message will not change so print the original
+      // message
+      printer.println(message);
+    } else { //when the keyword is not an empty string
+      // Make a new keyword that repeats the keyword until the length of the new keyword matches 
+      // the length of the message
+      char[] newKeyword = createNewKeyword(message, keyword);
+
+      if (instruction.equals("encode")) {
+        // Create the encrypted message by adding the keyword and the original message together
+        printer.println(createNewMsg(message, newKeyword, "encode"));
+      } else {
+        // Create the encrypted message by adding the keyword and the original message together
+        printer.println(createNewMsg(message, newKeyword, "decode"));
+      }
+    }
+  } // encode(PrintWriter, String, String, String)
+
+  /**
+   * Computes and returns the character code of the encrypted character.
+   * Pre-conditions: charCode and key must have (positive) ASCII codes between 97-122
+   * Post-conditions: returns the encrypted character code (positive and between 97-122)
+   */  
+  public static int encryptCharCode (int charCode, int key) {
+    int asciiValOfa = 97;
+    int numOfAlphabets = 26;
+
+    // Rebase the original character code to 0-25
+    int rebasedMsgCharCode = charCode - asciiValOfa;
+    // Rebase the keyword character code to 0-25
+    int rebasedKeyCharCode = key - asciiValOfa;
+    // Add the key's character code to the rebased message character code and handle the 
+    // "wrap-around" for whenever that sum is greater than 25
+    int newCharCode = (rebasedMsgCharCode + rebasedKeyCharCode) % numOfAlphabets;
+
+    return newCharCode + asciiValOfa;
+  } // encryptCharCode(int, int)
 } // class VigenereCipher
