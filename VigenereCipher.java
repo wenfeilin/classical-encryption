@@ -13,11 +13,10 @@ public class VigenereCipher {
   public static void main (String[] args) throws Exception {
     PrintWriter errorPrinter = new PrintWriter(System.err, true);
 
-    if (args.length != 3 && args.length != 2) {
-      // When the number of command-line arguments is not 3 (assuming the keyword
-      // is not an empty string) nor is it 2 (assuming the keyword is an empty string), 
-      // then indicate the error and exit appropriately
-      errorPrinter.println("Incorrect number of parameters"); 
+    if (args.length != 3) {
+      // When the number of command-line arguments is not 3
+      errorPrinter.println("Incorrect number of parameters. There must be three inputs:" + 
+          "instruction, string to encode or decode, key."); 
       System.exit(2);
     } else if (!(args[0].equals("encode") || args[0].equals("decode"))) {
       // When the instruction is not "encode" or "decode," indicate the error and exit 
